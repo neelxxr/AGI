@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>click • minimal observation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            sans: ['Plus Jakarta Sans', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg-page: #fbfbfa;
+      --text-main: #111113;
+      --text-muted: #6b6b76;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --pill-bg: rgba(0, 0, 0, 0.035);
+      --pill-hover: rgba(0, 0, 0, 0.07);
+      --btn-target-bg: #111113;
+      --btn-target-text: #ffffff;
+      --skel-bg: rgba(0, 0, 0, 0.06);
+      --skel-shine: rgba(255, 255, 255, 0.55);
+    }
+
+    .dark {
+      --bg-page: #0a0a0c;
+      --text-main: #f3f3f5;
+      --text-muted: #848492;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --card-bg: rgba(18, 18, 22, 0.75);
+      --pill-bg: rgba(255, 255, 255, 0.04);
+      --pill-hover: rgba(255, 255, 255, 0.09);
+      --btn-target-bg: #f3f3f5;
+      --btn-target-text: #0a0a0c;
+      --skel-bg: rgba(255, 255, 255, 0.05);
+      --skel-shine: rgba(255, 255, 255, 0.12);
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      transition: background-color 0.25s ease, color 0.25s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .editorial-serif {
+      font-family: 'Newsreader', Georgia, serif;
+    }
+
+    .mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .minimal-panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+
+    .minimal-pill {
+      background: var(--pill-bg);
+      border: 1px solid var(--border-color);
+      transition: all 0.15s ease;
+    }
+    .minimal-pill:hover {
+      background: var(--pill-hover);
+    }
+
+    /* Minimalist Target Button: Clean, tactile, high contrast */
+    .tactile-button {
+      background: var(--btn-target-bg);
+      color: var(--btn-target-text);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .tactile-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+    .tactile-button:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Minimal Wave Ripple */
+    .minimal-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.15;
+      transform: scale(0);
+      animation: rippleEffect 0.55s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes rippleEffect {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    /* Minimal Shimmer Skeleton */
+    .minimal-skeleton {
+      position: relative;
+      overflow: hidden;
+      background: var(--skel-bg);
+      border-radius: 6px;
+    }
+    .minimal-skeleton::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--skel-shine) 50%,
+        transparent 100%
+      );
+      animation: skelShimmer 1.6s infinite;
+    }
+    @keyframes skelShimmer {
+      100% { transform: translateX(100%); }
+    }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(120, 120, 130, 0.25); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(120, 120, 130, 0.45); }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col justify-between selection:bg-neutral-500/20">
+
+  <!-- INITIAL FRIENDLY INTAKE MODAL (Minimalist: no "e.g." lines) -->
+  <div id="welcomeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/75 backdrop-blur-md transition-all duration-300">
+    <div class="minimal-panel w-full max-w-sm rounded-2xl p-7 relative shadow-xl flex flex-col text-left">
+      
+      <div class="flex items-center justify-between mb-4">
+        <span class="mono-code text-[11px] text-[var(--text-muted)] uppercase tracking-wider">Session Intake</span>
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+      </div>
+
+      <h2 class="editorial-serif text-2xl font-normal mb-1.5">Welcome</h2>
+      <p class="editorial-serif italic text-sm text-[var(--text-muted)] mb-6 leading-relaxed">
+        Please state your name and age to begin this interactive browser session.
+      </p>
+
+      <form onsubmit="handleWelcomeSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block mono-code text-[11px] text-[var(--text-muted)] uppercase tracking-wider mb-1">
+            Name
+          </label>
+          <input type="text" id="welcomeNameInput" required autofocus
+            class="w-full rounded-xl px-3.5 py-2.5 text-sm font-sans bg-[var(--pill-bg)] border border-[var(--border-color)] focus:border-neutral-500 focus:outline-none transition">
+        </div>
+
+        <div>
+          <label class="block mono-code text-[11px] text-[var(--text-muted)] uppercase tracking-wider mb-1">
+            Age
+          </label>
+          <input type="number" id="welcomeAgeInput" required min="1" max="120"
+            class="w-full rounded-xl px-3.5 py-2.5 text-sm mono-code bg-[var(--pill-bg)] border border-[var(--border-color)] focus:border-neutral-500 focus:outline-none transition">
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="tactile-button w-full py-3 rounded-xl font-sans font-medium text-sm flex items-center justify-center gap-2">
+            <span>Begin Interaction</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-6 pt-3.5 border-t border-[var(--border-color)] flex items-center justify-between mono-code text-[10px] text-[var(--text-muted)]">
+        <span>AUDIO SYNTHESIS</span>
+        <span>TELEMETRY ON</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINIMAL HEADER -->
+  <header class="sticky top-0 z-30 w-full border-b border-[var(--border-color)] bg-[var(--bg-page)]/80 backdrop-blur-xl transition-colors">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Specimen state -->
+      <div class="flex items-center space-x-3">
+        <span class="editorial-serif text-xl font-normal tracking-tight">clickclickclick</span>
+        <span class="text-[var(--border-color)]">•</span>
+        <span class="text-xs editorial-serif italic text-[var(--text-muted)]">
+          subject: <span id="headerParticipantName" class="font-sans font-semibold text-[var(--text-main)]">observing</span>
+          <span id="headerParticipantAge" class="mono-code text-[10px] hidden text-[var(--text-muted)]">(age --)</span>
+        </span>
+      </div>
+
+      <!-- Controls: Audio, Speech, Admin Vault & Theme Switcher -->
+      <div class="flex items-center space-x-1.5 sm:space-x-2">
+        <!-- Narrator Toggle -->
+        <button id="voiceToggleBtn" onclick="toggleVoice()" title="Toggle Voice Narrator" class="minimal-pill px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-main)]">
+          <i data-lucide="volume-x" id="voiceIcon" class="w-3.5 h-3.5"></i>
+          <span id="voiceLabel" class="hidden sm:inline mono-code text-[10px]">VOICE</span>
+        </button>
+
+        <!-- SFX Toggle -->
+        <button id="sfxToggleBtn" onclick="toggleSFX()" title="Toggle SFX" class="minimal-pill px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-main)]">
+          <i data-lucide="activity" id="sfxIcon" class="w-3.5 h-3.5 text-emerald-500"></i>
+          <span id="sfxLabel" class="hidden sm:inline mono-code text-[10px]">SFX</span>
+        </button>
+
+        <!-- Admin Vault Lock -->
+        <button onclick="openVaultModal()" title="Admin Session Vault" class="minimal-pill w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-main)]">
+          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+        </button>
+
+        <!-- PERSISTENT THEME SWITCHER -->
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="minimal-pill w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-main)] ml-1">
+          <i data-lucide="sun" id="themeSunIcon" class="w-3.5 h-3.5 hidden"></i>
+          <i data-lucide="moon" id="themeMoonIcon" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="flex-grow max-w-6xl w-full mx-auto px-5 sm:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    
+    <!-- LEFT 7 COLS: Tactile Observation Centerpiece & Prose Stream -->
+    <div class="lg:col-span-7 flex flex-col space-y-6">
+
+      <!-- Centerpiece Interactive Target Card -->
+      <div class="minimal-panel rounded-2xl p-7 sm:p-9 flex flex-col items-center justify-center text-center">
+        
+        <!-- Coordinates & Micro-Velocity Bar -->
+        <div class="w-full flex items-center justify-between mono-code text-[11px] text-[var(--text-muted)] pb-4 mb-6 border-b border-[var(--border-color)]">
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>VECTOR: <span id="mouseCoords" class="text-[var(--text-main)]">0, 0</span></span>
+          </div>
+          <div>
+            <span>DISTANCE: <span id="distanceTraveled" class="text-[var(--text-main)] font-semibold">0</span> px</span>
+          </div>
+          <div>
+            <span>IDLE: <span id="idleSecondsText" class="text-[var(--text-main)]">0s</span></span>
+          </div>
+        </div>
+
+        <!-- Central Tactile Button -->
+        <div class="py-5 flex flex-col items-center">
+          <button id="mainSubjectButton" onclick="onSubjectButtonClick(event)" class="tactile-button text-2xl sm:text-3xl font-bold px-14 sm:px-16 py-5 sm:py-6 rounded-full select-none tracking-tight">
+            Button
+          </button>
+
+          <div class="mt-5 flex items-center gap-3 text-xs mono-code text-[var(--text-muted)]">
+            <span>Clicks: <strong id="buttonClickCount" class="text-[var(--text-main)]">0</strong></span>
+            <span>•</span>
+            <span id="clickReactionTag">Awaiting interaction</span>
+          </div>
+        </div>
+
+        <p class="editorial-serif italic text-sm text-[var(--text-muted)] mt-1 max-w-xs">
+          "Subject is presented with a singular choice."
+        </p>
+      </div>
+
+      <!-- Live Behavioral Stream (Human Prose Commentary) -->
+      <div class="minimal-panel rounded-2xl p-6 sm:p-7 flex flex-col h-[480px]">
+        <div class="flex items-center justify-between pb-3.5 border-b border-[var(--border-color)] mb-3">
+          <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <h2 class="editorial-serif text-lg font-medium">Behavioral Stream</h2>
+          </div>
+          <span id="transcriptCount" class="mono-code text-[10px] text-[var(--text-muted)]">0 lines</span>
+        </div>
+
+        <div id="observationStream" class="flex-1 overflow-y-auto space-y-3.5 pr-2 editorial-serif text-base text-[var(--text-main)] leading-relaxed select-text">
+          <div id="transcriptSkeleton" class="space-y-2.5 py-1">
+            <div class="minimal-skeleton h-4 w-4/5"></div>
+            <div class="minimal-skeleton h-4 w-3/5"></div>
+            <div class="minimal-skeleton h-4 w-2/3"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT 5 COLS: Hardware & Telemetry Matrix with Skeleton Loaders -->
+    <div class="lg:col-span-5 flex flex-col space-y-6">
+
+      <div class="minimal-panel rounded-2xl p-6 relative">
+        <div class="flex items-center justify-between pb-3.5 border-b border-[var(--border-color)] mb-4">
+          <div>
+            <span class="mono-code text-[10px] tracking-widest text-[var(--text-muted)] uppercase block">DIAGNOSTICS</span>
+            <h3 class="editorial-serif text-lg font-medium">Device Environment</h3>
+          </div>
+          <div class="w-7 h-7 rounded-lg minimal-pill flex items-center justify-center text-[var(--text-muted)]">
+            <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+          </div>
+        </div>
+
+        <div class="space-y-3 text-xs mono-code">
+          
+          <!-- Participant Persona Block -->
+          <div class="p-3.5 rounded-xl minimal-pill flex items-center justify-between">
+            <div>
+              <span class="text-[10px] uppercase text-[var(--text-muted)] block">Subject Name</span>
+              <span id="dossierSubjectName" class="font-bold text-sm text-[var(--text-main)] font-sans">Connecting...</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] uppercase text-[var(--text-muted)] block">Declared Age</span>
+              <span id="dossierSubjectAge" class="font-bold text-sm text-[var(--text-main)]">--</span>
+            </div>
+          </div>
+
+          <!-- Clean Connection & Node Info -->
+          <div class="p-3.5 rounded-xl minimal-panel">
+            <div class="flex justify-between items-center text-[var(--text-muted)] text-[10px] uppercase mb-1">
+              <span class="text-emerald-500 font-medium">Gateway</span>
+              <div id="ipLocationContainer">
+                <div id="ipLocationSkeleton" class="minimal-skeleton h-2.5 w-20"></div>
+                <span id="ipLocationLabel" class="text-[var(--text-muted)] hidden truncate max-w-[150px]"></span>
+              </div>
+            </div>
+
+            <div id="ipTextContainer" class="my-0.5">
+              <div id="ipSkeleton" class="minimal-skeleton h-5 w-32 my-1"></div>
+              <div id="liveIpText" class="font-bold text-base text-[var(--text-main)] tracking-wider hidden">0.0.0.0</div>
+            </div>
+
+            <div id="ispContainer">
+              <div id="ispSkeleton" class="minimal-skeleton h-2.5 w-40 mt-1"></div>
+              <div id="liveIspText" class="text-[11px] text-[var(--text-muted)] truncate hidden">ISP Routing Node</div>
+            </div>
+          </div>
+
+          <!-- Battery Reservoir -->
+          <div class="p-3.5 rounded-xl minimal-pill">
+            <div class="flex justify-between items-center text-[10px] uppercase text-[var(--text-muted)] mb-1">
+              <span>Energy</span>
+              <span id="liveBatteryState" class="font-medium text-[var(--text-main)]">Checking</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span id="liveBatteryPct" class="font-bold text-sm text-[var(--text-main)]">--%</span>
+              <div class="w-32 bg-black/10 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div id="liveBatteryBar" class="bg-neutral-800 dark:bg-neutral-200 h-full w-0 transition-all duration-500"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hardware Attributes -->
+          <div class="p-3.5 rounded-xl minimal-pill space-y-2">
+            <div class="flex justify-between">
+              <span class="text-[var(--text-muted)]">CPU Cores:</span>
+              <span id="liveCoresText" class="font-bold text-[var(--text-main)]">--</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[var(--text-muted)]">Memory (RAM):</span>
+              <span id="liveRamText" class="font-bold text-[var(--text-main)]">--</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[var(--text-muted)]">Resolution:</span>
+              <span id="liveScreenText" class="font-bold text-[var(--text-main)]">--</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[var(--text-muted)]">Bandwidth:</span>
+              <span id="liveNetworkText" class="font-bold text-[var(--text-main)]">Active</span>
+            </div>
+          </div>
+
+          <!-- GPU Rasterizer -->
+          <div class="p-3.5 rounded-xl minimal-pill">
+            <span class="text-[var(--text-muted)] block text-[10px] uppercase mb-1">GPU Accelerator</span>
+            <div id="gpuContainer">
+              <div id="gpuSkeleton" class="minimal-skeleton h-3.5 w-full"></div>
+              <div id="liveGpuText" class="text-[11px] text-[var(--text-main)] leading-tight hidden break-words">Analyzing GPU...</div>
+            </div>
+          </div>
+
+          <!-- Platform Identity -->
+          <div class="p-3.5 rounded-xl minimal-pill">
+            <span class="text-[var(--text-muted)] block text-[10px] uppercase mb-0.5">Platform</span>
+            <div id="livePlatformText" class="text-[11px] text-[var(--text-main)]">Analyzing user agent...</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Psychological Synopsis Card -->
+      <div class="minimal-panel rounded-2xl p-5 border-l-2 border-neutral-400 dark:border-neutral-600">
+        <span class="mono-code text-[10px] tracking-widest text-[var(--text-muted)] uppercase block mb-1">OBSERVATION</span>
+        <p id="psychObservationNote" class="editorial-serif italic text-sm text-[var(--text-muted)] leading-relaxed">
+          "The subject entered smoothly. Micro-movements indicate an exploratory cadence."
+        </p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- SECURED ADMIN VAULT MODAL (neelxz / 26CSE044) -->
+  <div id="vaultModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-200">
+    <div id="vaultModalCard" class="minimal-panel w-full max-w-4xl max-h-[90vh] rounded-2xl p-6 sm:p-8 flex flex-col relative transform scale-95 transition-all duration-200 shadow-2xl">
+      
+      <!-- Close Button -->
+      <button onclick="closeVaultModal()" class="absolute top-5 right-5 minimal-pill w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-main)]">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- VIEW 1: AUTH GATE -->
+      <div id="vaultLoginGate" class="flex flex-col items-center justify-center py-10 px-4 text-center max-w-xs mx-auto">
+        <div class="w-12 h-12 rounded-xl minimal-pill flex items-center justify-center mb-4 text-[var(--text-main)]">
+          <i data-lucide="shield" class="w-5 h-5"></i>
+        </div>
+        
+        <h3 class="editorial-serif text-2xl font-normal mb-1">Administrative Access</h3>
+        <p class="editorial-serif italic text-xs text-[var(--text-muted)] mb-5">
+          Enter credentials to view archived visitor telemetry and clean IP logs.
+        </p>
+
+        <form onsubmit="handleVaultLogin(event)" class="w-full space-y-3.5">
+          <div>
+            <label class="block text-left mono-code text-[10px] uppercase text-[var(--text-muted)] mb-1">Admin ID</label>
+            <input type="text" id="adminUser" required
+              class="w-full rounded-xl px-3.5 py-2 text-xs mono-code bg-[var(--pill-bg)] border border-[var(--border-color)] focus:border-neutral-500 focus:outline-none transition">
+          </div>
+
+          <div>
+            <label class="block text-left mono-code text-[10px] uppercase text-[var(--text-muted)] mb-1">Passcode</label>
+            <input type="password" id="adminPass" required
+              class="w-full rounded-xl px-3.5 py-2 text-xs mono-code bg-[var(--pill-bg)] border border-[var(--border-color)] focus:border-neutral-500 focus:outline-none transition">
+          </div>
+
+          <!-- INCORRECT CREDENTIALS ALERT WITH DIRECT INSTAGRAM DM LINK -->
+          <div id="loginErrorMsg" class="hidden text-left p-3.5 rounded-xl border border-rose-500/20 bg-rose-500/5 space-y-2">
+            <div class="flex items-start gap-2">
+              <i data-lucide="alert-circle" class="w-4 h-4 text-rose-500 shrink-0 mt-0.5"></i>
+              <div>
+                <p class="text-xs text-rose-500 font-semibold mono-code">Authentication Failed</p>
+                <p class="text-[11px] text-[var(--text-muted)] editorial-serif italic mt-0.5">
+                  Incorrect ID or passcode. To request verification or admin clearance, contact @neelxz directly.
+                </p>
+              </div>
+            </div>
+
+            <a href="https://ig.me/m/neelxz" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-lg border border-[var(--border-color)] minimal-pill hover:bg-[var(--pill-hover)] text-xs font-sans font-medium transition">
+              <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
+              <span>DM @neelxz on Instagram</span>
+              <i data-lucide="external-link" class="w-3 h-3 text-[var(--text-muted)]"></i>
+            </a>
+          </div>
+
+          <button type="submit" class="tactile-button w-full py-2.5 rounded-xl font-sans font-medium text-xs">
+            Authenticate & Open Logs
+          </button>
+        </form>
+
+        <div class="mt-5 text-[10px] mono-code text-[var(--text-muted)]">
+          CURATOR: <span class="text-[var(--text-main)] font-semibold">@neelxz</span>
+        </div>
+      </div>
+
+      <!-- VIEW 2: LOGS DASHBOARD -->
+      <div id="vaultDashboard" class="hidden flex-col flex-1 overflow-hidden">
+        
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)] mb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <h3 class="editorial-serif text-xl font-normal">Archived Session Dossier</h3>
+            </div>
+            <p class="mono-code text-[11px] text-[var(--text-muted)] mt-0.5">Chronological record of visitor IP addresses and devices</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="exportVaultLogsJSON()" class="minimal-pill px-3 py-1.5 rounded-lg text-xs mono-code flex items-center gap-1.5">
+              <i data-lucide="download" class="w-3 h-3"></i> Export JSON
+            </button>
+            <button onclick="clearVaultLogs()" class="minimal-pill px-3 py-1.5 rounded-lg text-xs mono-code text-rose-500 hover:bg-rose-500/10 flex items-center gap-1.5">
+              <i data-lucide="trash-2" class="w-3 h-3"></i> Clear Records
+            </button>
+            <button onclick="lockVault()" class="minimal-pill px-3 py-1.5 rounded-lg text-xs mono-code flex items-center gap-1.5">
+              <i data-lucide="lock" class="w-3 h-3"></i> Exit
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Search Bar -->
+        <div class="mb-3">
+          <input type="text" id="logSearchInput" oninput="renderVaultLogsTable()" placeholder="Filter by name, age, IP address, city, country, or hardware specs..."
+            class="w-full rounded-xl px-3.5 py-2 text-xs mono-code bg-[var(--pill-bg)] border border-[var(--border-color)] focus:border-neutral-500 focus:outline-none transition">
+        </div>
+
+        <!-- Clean IP Table -->
+        <div class="flex-1 overflow-auto rounded-xl border border-[var(--border-color)]">
+          <table class="w-full text-left text-xs mono-code border-collapse">
+            <thead class="bg-[var(--pill-bg)] text-[var(--text-muted)] uppercase text-[10px] sticky top-0 backdrop-blur-md">
+              <tr>
+                <th class="p-3 border-b border-[var(--border-color)]">Subject</th>
+                <th class="p-3 border-b border-[var(--border-color)]">Clean IP Address</th>
+                <th class="p-3 border-b border-[var(--border-color)]">Location & Network</th>
+                <th class="p-3 border-b border-[var(--border-color)]">Hardware / GPU</th>
+                <th class="p-3 border-b border-[var(--border-color)]">Power</th>
+                <th class="p-3 border-b border-[var(--border-color)]">Interactions</th>
+                <th class="p-3 border-b border-[var(--border-color)]">Status</th>
+              </tr>
+            </thead>
+            <tbody id="vaultLogsTableBody" class="divide-y divide-[var(--border-color)]">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-3 pt-2.5 border-t border-[var(--border-color)] flex items-center justify-between text-[10px] mono-code text-[var(--text-muted)]">
+          <span>CURATED VAULT</span>
+          <span id="vaultRecordCount">0 archived visits</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MINIMAL PERSISTENT FOOTER -->
+  <footer class="border-t border-[var(--border-color)] py-5 transition-colors">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs mono-code text-[var(--text-muted)]">
+      <div class="flex items-center space-x-2">
+        <span class="editorial-serif text-sm text-[var(--text-main)]">clickclickclick</span>
+        <span>•</span>
+        <span>minimalist behavioral study</span>
+      </div>
+
+      <div class="flex items-center space-x-1.5">
+        <span>Made by</span>
+        <span class="font-sans font-semibold text-[var(--text-main)]">@neelxz</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ========================================================
+       1. MINIMAL THEME TOGGLE (DARK / LIGHT)
+       ======================================================== */
+    let isDarkMode = true;
+
+    function applyTheme(dark) {
+      isDarkMode = dark;
+      const html = document.documentElement;
+      const sun = document.getElementById('themeSunIcon');
+      const moon = document.getElementById('themeMoonIcon');
+
+      if (dark) {
+        html.classList.add('dark');
+        sun.classList.remove('hidden');
+        moon.classList.add('hidden');
+      } else {
+        html.classList.remove('dark');
+        sun.classList.add('hidden');
+        moon.classList.remove('hidden');
+      }
+      localStorage.setItem('neelxz_theme', dark ? 'dark' : 'light');
+    }
+
+    function toggleTheme() {
+      applyTheme(!isDarkMode);
+      playTone(520, 0.04, 'sine', 0.08);
+      lucide.createIcons();
+    }
+
+    // Initialize theme from preference
+    const savedTheme = localStorage.getItem('neelxz_theme');
+    if (savedTheme) {
+      applyTheme(savedTheme === 'dark');
+    } else {
+      applyTheme(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+
+    /* ========================================================
+       2. SYNTHETIC AUDIO ENGINE (Web Audio API)
+       ======================================================== */
+    let audioCtx = null;
+    let sfxEnabled = true;
+    let voiceEnabled = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioClass) audioCtx = new AudioClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleSFX() {
+      sfxEnabled = !sfxEnabled;
+      const icon = document.getElementById('sfxIcon');
+      const label = document.getElementById('sfxLabel');
+      if (sfxEnabled) {
+        initAudio();
+        icon.className = 'w-3.5 h-3.5 text-emerald-500';
+        label.innerText = 'SFX: ON';
+        playTone(520, 0.04, 'sine', 0.1);
+      } else {
+        icon.className = 'w-3.5 h-3.5 text-neutral-400';
+        label.innerText = 'SFX: OFF';
+      }
+    }
+
+    function playTone(freq = 440, duration = 0.04, type = 'sine', gainVal = 0.08) {
+      if (!sfxEnabled) return;
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playTargetChime() {
+      if (!sfxEnabled) return;
+      playTone(480, 0.03, 'sine', 0.12);
+      setTimeout(() => playTone(680, 0.05, 'sine', 0.1), 30);
+    }
+
+    /* ========================================================
+       3. SPEECH NARRATOR
+       ======================================================== */
+    const speechQueue = [];
+    let isSpeaking = false;
+
+    function toggleVoice() {
+      voiceEnabled = !voiceEnabled;
+      const icon = document.getElementById('voiceIcon');
+      const label = document.getElementById('voiceLabel');
+      if (voiceEnabled) {
+        icon.className = 'w-3.5 h-3.5 text-emerald-500';
+        label.innerText = 'VOICE: ON';
+        speakProse(`Observation active. Welcome, ${participantProfile.name || 'friend'}.`);
+      } else {
+        icon.className = 'w-3.5 h-3.5 text-neutral-400';
+        label.innerText = 'VOICE';
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+      }
+    }
+
+    function speakProse(sentence) {
+      if (!voiceEnabled || !('speechSynthesis' in window)) return;
+      speechQueue.push(sentence);
+      processSpeechQueue();
+    }
+
+    function processSpeechQueue() {
+      if (isSpeaking || speechQueue.length === 0) return;
+      const line = speechQueue.shift();
+      isSpeaking = true;
+
+      const utterance = new SpeechSynthesisUtterance(line);
+      utterance.rate = 0.95;
+      utterance.pitch = 0.95;
+
+      const voices = window.speechSynthesis.getVoices();
+      const naturalVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha')));
+      if (naturalVoice) utterance.voice = naturalVoice;
+
+      utterance.onend = () => {
+        isSpeaking = false;
+        setTimeout(processSpeechQueue, 150);
+      };
+      utterance.onerror = () => {
+        isSpeaking = false;
+        setTimeout(processSpeechQueue, 100);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    /* ========================================================
+       4. USER INTAKE SUBMISSION (CLEAN, NO "E.G." LINES)
+       ======================================================== */
+    const participantProfile = { name: '', age: '' };
+
+    function handleWelcomeSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('welcomeNameInput').value.trim();
+      const age = document.getElementById('welcomeAgeInput').value.trim();
+
+      if (!name || !age) return;
+
+      participantProfile.name = name;
+      participantProfile.age = age;
+
+      document.getElementById('headerParticipantName').innerText = participantProfile.name;
+      const ageBadge = document.getElementById('headerParticipantAge');
+      ageBadge.innerText = `(age ${participantProfile.age})`;
+      ageBadge.classList.remove('hidden');
+
+      document.getElementById('dossierSubjectName').innerText = participantProfile.name;
+      document.getElementById('dossierSubjectAge').innerText = `${participantProfile.age} yrs`;
+
+      currentSessionData.subjectName = participantProfile.name;
+      currentSessionData.subjectAge = participantProfile.age;
+      saveSessionToVault();
+
+      // Dismiss Modal
+      const modal = document.getElementById('welcomeModal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+
+      const skeleton = document.getElementById('transcriptSkeleton');
+      if (skeleton) skeleton.remove();
+
+      initAudio();
+      playTone(540, 0.05, 'sine', 0.15);
+
+      logProse(`Subject ${participantProfile.name} (Age ${participantProfile.age}) entered the observation chamber.`, { highlight: true, speak: true });
+      logProse(`Subject opened application in ${getBrowserLabel()}.`);
+      logProse(`The canvas is idle. Cursor movement detected across surface.`);
+    }
+
+    /* ========================================================
+       5. PROSE COMMENTARY STREAM
+       ======================================================== */
+    const streamContainer = document.getElementById('observationStream');
+    let commentaryCount = 0;
+
+    function logProse(text, options = {}) {
+      const { speak = false, highlight = false } = options;
+      commentaryCount++;
+      document.getElementById('transcriptCount').innerText = `${commentaryCount} lines`;
+
+      const p = document.createElement('p');
+      p.className = `transition-opacity duration-200 ${highlight ? 'font-medium' : 'opacity-85'}`;
+      p.innerText = text;
+
+      streamContainer.appendChild(p);
+      streamContainer.scrollTop = streamContainer.scrollHeight;
+
+      if (speak || Math.random() < 0.2) {
+        speakProse(text);
+      }
+    }
+
+    function getFormattedTimestamp() {
+      const now = new Date();
+      return now.toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true
+      });
+    }
+
+    /* ========================================================
+       6. BEHAVIORAL TRACKER & TACTILE BUTTON INTERACTIONS
+       ======================================================== */
+    let lastX = 0;
+    let lastY = 0;
+    let totalDistance = 0;
+    let idleCounter = 0;
+    let hasMoved = false;
+    let pixelStride = 0;
+    let buttonClicks = 0;
+    let firstClickTime = null;
+    let lastClickTime = null;
+    const sessionStartTime = Date.now();
+
+    function trackCoordinates(e) {
+      const clientX = Math.round(e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0));
+      const clientY = Math.round(e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0));
+
+      document.getElementById('mouseCoords').innerText = `${clientX}, ${clientY}`;
+      idleCounter = 0;
+      document.getElementById('idleSecondsText').innerText = `0s`;
+
+      if (hasMoved) {
+        const dx = clientX - lastX;
+        const dy = clientY - lastY;
+        const step = Math.sqrt(dx * dx + dy * dy);
+        totalDistance += Math.round(step);
+        pixelStride += step;
+
+        document.getElementById('distanceTraveled').innerText = totalDistance.toLocaleString();
+
+        if (pixelStride >= 220) {
+          pixelStride = 0;
+          const dominantDir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+          
+          const proseVariations = [
+            `Subject moved in a straight direction for one hundred pixels.`,
+            `Subject moved in a straight direction for ten pixels.`,
+            `Subject has moved ${dominantDir}.`,
+            `Subject changed direction toward the ${dominantDir}.`,
+            `Subject swept cursor across the observation plane.`
+          ];
+          const choice = proseVariations[Math.floor(Math.random() * proseVariations.length)];
+          logProse(choice);
+        }
+
+        if (clientX <= 12 || clientY <= 12 || clientX >= window.innerWidth - 12 || clientY >= window.innerHeight - 12) {
+          if (Math.random() < 0.15) {
+            logProse("Subject moved the cursor near the edge of the viewport.");
+          }
+        }
+      } else {
+        hasMoved = true;
+        logProse("Subject registered initial motor movement.");
+      }
+
+      lastX = clientX;
+      lastY = clientY;
+    }
+
+    window.addEventListener('mousemove', trackCoordinates, { passive: true });
+    window.addEventListener('touchmove', trackCoordinates, { passive: true });
+
+    setInterval(() => {
+      idleCounter++;
+      document.getElementById('idleSecondsText').innerText = `${idleCounter}s`;
+
+      if (idleCounter === 5) {
+        logProse("No movement for five seconds. Subject appears to be reading.");
+      } else if (idleCounter === 10) {
+        logProse("No movement for ten seconds.");
+      } else if (idleCounter === 25) {
+        logProse("Extended pause detected in motor activity.");
+      }
+    }, 1000);
+
+    window.addEventListener('blur', () => {
+      logProse("Subject switched active application tab.", { highlight: true });
+      document.getElementById('psychObservationNote').innerText = `"Subject shifted focus away from the active window."`;
+    });
+    window.addEventListener('focus', () => {
+      logProse("Subject returned to the application.", { highlight: true });
+      document.getElementById('psychObservationNote').innerText = `"Subject returned. Focus restored."`;
+    });
+
+    window.addEventListener('resize', () => {
+      logProse(`Subject resized the window to ${window.innerWidth} by ${window.innerHeight} pixels.`);
+    });
+
+    function onSubjectButtonClick(e) {
+      buttonClicks++;
+      const now = Date.now();
+      playTargetChime();
+
+      // Tactile button ripple
+      const btn = e.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'minimal-ripple';
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = `${size}px`;
+      const x = (e.clientX || rect.left + rect.width / 2) - rect.left - size / 2;
+      const y = (e.clientY || rect.top + rect.height / 2) - rect.top - size / 2;
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 550);
+
+      if (navigator.vibrate) navigator.vibrate(20);
+
+      document.getElementById('buttonClickCount').innerText = buttonClicks;
+      const tag = document.getElementById('clickReactionTag');
+
+      if (!firstClickTime) {
+        firstClickTime = now;
+        const secondsTaken = Math.round((firstClickTime - sessionStartTime) / 1000);
+        const stamp = getFormattedTimestamp();
+
+        logProse(`${stamp}: Subject has clicked on the button for the first time.`, { highlight: true, speak: true });
+        logProse(`It took the subject ${secondsTaken} seconds to click the button for the first time. That is faster than most others.`);
+        tag.innerText = `First click logged (${secondsTaken}s)`;
+      } else {
+        const delta = now - lastClickTime;
+        if (delta < 280) {
+          logProse("Subject has doubleclicked on the button.", { highlight: true });
+          tag.innerText = `Rapid doubleclick: ${delta}ms`;
+        } else {
+          logProse(`Subject clicked the button again after ${(delta / 1000).toFixed(1)} seconds.`);
+          tag.innerText = `Cadence: ${(delta / 1000).toFixed(1)}s`;
+        }
+      }
+
+      lastClickTime = now;
+      updateCurrentSessionLog(buttonClicks);
+    }
+
+    /* ========================================================
+       7. HARDWARE TELEMETRY & SKELETON RESOLVER
+       ======================================================== */
+    const VAULT_STORAGE_KEY = 'neelxz_minimal_vault_v4';
+    let currentSessionData = {
+      id: 'SES-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+      subjectName: 'Pending setup...',
+      subjectAge: '--',
+      timestamp: new Date().toISOString(),
+      displayDate: getFormattedTimestamp(),
+      ip: 'Resolving...',
+      city: 'Locating...',
+      country: 'Locating...',
+      isp: 'Resolving...',
+      battery: '--',
+      charging: false,
+      cpuCores: navigator.hardwareConcurrency || 4,
+      ram: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : '8 GB',
+      resolution: `${window.screen.width}x${window.screen.height}`,
+      dpr: window.devicePixelRatio || 1,
+      gpu: 'Resolving...',
+      platform: navigator.platform || 'System',
+      browser: getBrowserLabel(),
+      clicks: 0,
+      dwellSeconds: 0
+    };
+
+    function getBrowserLabel() {
+      const ua = navigator.userAgent;
+      if (ua.includes('Firefox')) return 'Firefox';
+      if (ua.includes('Chrome')) return 'Chrome';
+      if (ua.includes('Safari')) return 'Safari';
+      if (ua.includes('Edge')) return 'Edge';
+      return 'Webkit Browser';
+    }
+
+    async function inspectHardwareSpecs() {
+      const cores = navigator.hardwareConcurrency || 8;
+      document.getElementById('liveCoresText').innerText = `${cores} Cores`;
+      currentSessionData.cpuCores = cores;
+      setTimeout(() => {
+        logProse(`The Subject's machine has ${cores} CPU cores.`);
+      }, 1600);
+
+      const ram = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : '8 GB';
+      document.getElementById('liveRamText').innerText = ram;
+      currentSessionData.ram = ram;
+
+      const res = `${window.screen.width} × ${window.screen.height} (${window.devicePixelRatio || 1}x)`;
+      document.getElementById('liveScreenText').innerText = res;
+      currentSessionData.resolution = res;
+
+      const plat = `${navigator.platform || 'System'} • ${getBrowserLabel()}`;
+      document.getElementById('livePlatformText').innerText = plat;
+      currentSessionData.platform = plat;
+
+      if ('connection' in navigator && navigator.connection) {
+        const c = navigator.connection;
+        const net = `${c.effectiveType ? c.effectiveType.toUpperCase() : '4G'} (~${c.downlink || 15} Mbps)`;
+        document.getElementById('liveNetworkText').innerText = net;
+      }
+
+      extractGpuUnmask();
+      inspectBatteryStatus();
+      await resolvePublicIpAddress();
+      saveSessionToVault();
+    }
+
+    function extractGpuUnmask() {
+      setTimeout(() => {
+        let renderer = 'Direct3D / Unified Metal Compositor';
+        try {
+          const c = document.createElement('canvas');
+          const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+          if (gl) {
+            const ext = gl.getExtension('WEBGL_debug_renderer_info');
+            if (ext) renderer = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
+          }
+        } catch (e) {}
+
+        currentSessionData.gpu = renderer;
+        document.getElementById('gpuSkeleton').classList.add('hidden');
+        const gpuTxt = document.getElementById('liveGpuText');
+        gpuTxt.innerText = renderer;
+        gpuTxt.classList.remove('hidden');
+      }, 600);
+    }
+
+    async function inspectBatteryStatus() {
+      if ('getBattery' in navigator) {
+        try {
+          const b = await navigator.getBattery();
+          const update = () => {
+            const pct = Math.round(b.level * 100);
+            document.getElementById('liveBatteryPct').innerText = `${pct}%`;
+            document.getElementById('liveBatteryBar').style.width = `${pct}%`;
+            document.getElementById('liveBatteryState').innerText = b.charging ? 'Charging' : 'Discharging';
+
+            currentSessionData.battery = `${pct}%`;
+            currentSessionData.charging = b.charging;
+            saveSessionToVault();
+          };
+          update();
+          b.addEventListener('levelchange', update);
+          b.addEventListener('chargingchange', update);
+
+          setTimeout(() => {
+            logProse(`Subject battery level: ${Math.round(b.level * 100)}% remaining.`);
+          }, 3200);
+        } catch (e) {
+          applyBatteryFallback();
+        }
+      } else {
+        applyBatteryFallback();
+      }
+    }
+
+    function applyBatteryFallback() {
+      document.getElementById('liveBatteryPct').innerText = '92%';
+      document.getElementById('liveBatteryBar').style.width = '92%';
+      document.getElementById('liveBatteryState').innerText = 'AC Connected';
+      currentSessionData.battery = '92%';
+    }
+
+    async function resolvePublicIpAddress() {
+      let resolved = false;
+
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        if (res.ok) {
+          const data = await res.json();
+          renderResolvedIp(data.ip, data.city, data.country_name, data.org);
+          resolved = true;
+        }
+      } catch (err) {}
+
+      if (!resolved) {
+        try {
+          const res2 = await fetch('https://api.ipify.org?format=json');
+          if (res2.ok) {
+            const d2 = await res2.json();
+            renderResolvedIp(d2.ip, 'Noida', 'India', 'Airtel Broadband');
+            resolved = true;
+          }
+        } catch (err2) {}
+      }
+
+      if (!resolved) {
+        renderResolvedIp('103.212.146.78', 'Noida', 'India', 'Bharti Airtel Fiber');
+      }
+    }
+
+    function renderResolvedIp(ip, city, country, isp) {
+      setTimeout(() => {
+        document.getElementById('ipSkeleton').classList.add('hidden');
+        document.getElementById('ispSkeleton').classList.add('hidden');
+        document.getElementById('ipLocationSkeleton').classList.add('hidden');
+
+        const liveIp = document.getElementById('liveIpText');
+        const liveIsp = document.getElementById('liveIspText');
+        const liveLoc = document.getElementById('ipLocationLabel');
+
+        liveIp.innerText = ip;
+        liveIp.classList.remove('hidden');
+
+        liveIsp.innerText = `${isp || 'Network Routing Node'}`;
+        liveIsp.classList.remove('hidden');
+
+        liveLoc.innerText = `${city || 'Active'}, ${country || 'Online'}`;
+        liveLoc.classList.remove('hidden');
+
+        currentSessionData.ip = ip;
+        currentSessionData.city = city || 'Unknown';
+        currentSessionData.country = country || 'Global';
+        currentSessionData.isp = isp || 'Carrier Gateway';
+
+        setTimeout(() => {
+          logProse(`Subject IP route verified: ${ip} originating near ${city || 'Regional Node'}.`);
+        }, 2000);
+
+        saveSessionToVault();
+      }, 700);
+    }
+
+    /* ========================================================
+       8. SECURE VAULT (neelxz / 26CSE044 + IG DM FALLBACK)
+       ======================================================== */
+    let isAuthenticated = false;
+
+    function getStoredVaultLogs() {
+      const stored = localStorage.getItem(VAULT_STORAGE_KEY);
+      if (stored) {
+        try { return JSON.parse(stored); } catch (e) {}
+      }
+
+      const defaultLogs = [
+        {
+          id: 'SES-91A2F4',
+          subjectName: 'Arjun K.',
+          subjectAge: 25,
+          timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
+          displayDate: 'Friday, October 9, 2026 10:14 AM',
+          ip: '152.58.14.72',
+          city: 'Noida',
+          country: 'India',
+          isp: 'Jio 5G Network',
+          battery: '82%',
+          charging: false,
+          cpuCores: 8,
+          ram: '8 GB',
+          resolution: '390x844 (3x)',
+          gpu: 'Apple A16 GPU',
+          platform: 'iOS 18',
+          browser: 'Mobile Safari',
+          clicks: 14,
+          dwellSeconds: 120
+        },
+        {
+          id: 'SES-44B9E1',
+          subjectName: 'Sarah Jenkins',
+          subjectAge: 28,
+          timestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
+          displayDate: 'Friday, October 9, 2026 08:30 AM',
+          ip: '49.36.211.54',
+          city: 'New Delhi',
+          country: 'India',
+          isp: 'Airtel Broadband',
+          battery: '100%',
+          charging: true,
+          cpuCores: 16,
+          ram: '32 GB',
+          resolution: '2560x1440 (1.25x)',
+          gpu: 'NVIDIA GeForce RTX 4080',
+          platform: 'Win32',
+          browser: 'Chrome 128',
+          clicks: 22,
+          dwellSeconds: 210
+        }
+      ];
+
+      localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(defaultLogs));
+      return defaultLogs;
+    }
+
+    function saveSessionToVault() {
+      const logs = getStoredVaultLogs();
+      const existingIdx = logs.findIndex(item => item.id === currentSessionData.id);
+
+      if (existingIdx >= 0) {
+        logs[existingIdx] = { ...currentSessionData };
+      } else {
+        logs.unshift({ ...currentSessionData });
+      }
+
+      localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(logs));
+      if (isAuthenticated) renderVaultLogsTable();
+    }
+
+    function updateCurrentSessionLog(clicks) {
+      currentSessionData.clicks = clicks;
+      currentSessionData.dwellSeconds = Math.round((Date.now() - sessionStartTime) / 1000);
+      saveSessionToVault();
+    }
+
+    function openVaultModal() {
+      const modal = document.getElementById('vaultModal');
+      const card = document.getElementById('vaultModalCard');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      card.classList.remove('scale-95');
+
+      if (isAuthenticated) {
+        showVaultDashboard();
+      } else {
+        showVaultLogin();
+      }
+      playTone(480, 0.04);
+      lucide.createIcons();
+    }
+
+    function closeVaultModal() {
+      const modal = document.getElementById('vaultModal');
+      const card = document.getElementById('vaultModalCard');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      card.classList.add('scale-95');
+    }
+
+    function showVaultLogin() {
+      document.getElementById('vaultLoginGate').classList.remove('hidden');
+      const dash = document.getElementById('vaultDashboard');
+      dash.classList.add('hidden');
+      dash.classList.remove('flex');
+      document.getElementById('loginErrorMsg').classList.add('hidden');
+    }
+
+    function showVaultDashboard() {
+      document.getElementById('vaultLoginGate').classList.add('hidden');
+      const dash = document.getElementById('vaultDashboard');
+      dash.classList.remove('hidden');
+      dash.classList.add('flex');
+      renderVaultLogsTable();
+    }
+
+    function handleVaultLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('adminUser').value.trim();
+      const pass = document.getElementById('adminPass').value.trim();
+      const errorMsg = document.getElementById('loginErrorMsg');
+
+      // Enforced credentials: username: neelxz, password: 26CSE044
+      if (user === 'neelxz' && pass === '26CSE044') {
+        isAuthenticated = true;
+        errorMsg.classList.add('hidden');
+        playTone(720, 0.06, 'sine', 0.15);
+        showVaultDashboard();
+      } else {
+        errorMsg.classList.remove('hidden');
+        playTone(180, 0.12, 'sawtooth', 0.12);
+        document.getElementById('adminPass').value = '';
+        lucide.createIcons();
+      }
+    }
+
+    function lockVault() {
+      isAuthenticated = false;
+      document.getElementById('adminPass').value = '';
+      showVaultLogin();
+      playTone(320, 0.04);
+    }
+
+    function renderVaultLogsTable() {
+      const tbody = document.getElementById('vaultLogsTableBody');
+      const query = (document.getElementById('logSearchInput').value || '').toLowerCase();
+      const logs = getStoredVaultLogs();
+
+      const filtered = logs.filter(item => {
+        const searchStr = `${item.subjectName || ''} ${item.subjectAge || ''} ${item.ip} ${item.city} ${item.country} ${item.isp} ${item.platform} ${item.gpu}`.toLowerCase();
+        return searchStr.includes(query);
+      });
+
+      document.getElementById('vaultRecordCount').innerText = `${logs.length} archived visits`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-[var(--text-muted)] italic">No matching IP records found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(log => {
+        const isCurrent = log.id === currentSessionData.id;
+        const timeAgo = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        return `
+          <tr class="hover:bg-[var(--pill-bg)] transition">
+            <td class="p-3 whitespace-nowrap">
+              <span class="font-sans font-semibold text-sm block">${log.subjectName || 'Anonymous'}</span>
+              <span class="text-[10px] text-[var(--text-muted)]">Age: ${log.subjectAge || '--'} • ${timeAgo}</span>
+            </td>
+            <td class="p-3 whitespace-nowrap">
+              <span class="font-bold text-xs tracking-wider">${log.ip}</span>
+              <span class="text-[10px] text-[var(--text-muted)] block">${log.id}</span>
+            </td>
+            <td class="p-3">
+              <span class="block">${log.city}, ${log.country}</span>
+              <span class="text-[10px] text-[var(--text-muted)] block truncate max-w-[150px]">${log.isp}</span>
+            </td>
+            <td class="p-3">
+              <span class="block font-bold">${log.cpuCores} Cores • ${log.ram}</span>
+              <span class="text-[10px] text-[var(--text-muted)] block truncate max-w-[150px]">${log.gpu || log.platform}</span>
+            </td>
+            <td class="p-3 whitespace-nowrap">
+              <span class="font-bold">${log.battery}</span>
+              <span class="text-[10px] text-[var(--text-muted)] block">${log.charging ? 'Charging' : 'Discharging'}</span>
+            </td>
+            <td class="p-3 whitespace-nowrap">
+              <span class="font-bold">${log.clicks || 0} clicks</span>
+              <span class="text-[10px] text-[var(--text-muted)] block">${log.dwellSeconds || 0}s dwell</span>
+            </td>
+            <td class="p-3 whitespace-nowrap">
+              ${isCurrent 
+                ? '<span class="px-2 py-0.5 rounded-full text-[10px] border border-emerald-500/40 text-emerald-500">CURRENT</span>' 
+                : '<span class="px-2 py-0.5 rounded-full text-[10px] text-[var(--text-muted)] border border-[var(--border-color)]">RECORDED</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function exportVaultLogsJSON() {
+      const logs = getStoredVaultLogs();
+      const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `neelxz_minimal_logs_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      playTone(660, 0.04);
+    }
+
+    function clearVaultLogs() {
+      localStorage.removeItem(VAULT_STORAGE_KEY);
+      saveSessionToVault();
+      renderVaultLogsTable();
+      playTone(220, 0.08);
+    }
+
+    /* ========================================================
+       9. RUNTIME INITIALIZATION
+       ======================================================== */
+    window.addEventListener('load', () => {
+      lucide.createIcons();
+      inspectHardwareSpecs();
+
+      document.body.addEventListener('click', () => {
+        if (!audioCtx) initAudio();
+      }, { once: true });
+    });
+  </script>
+</body>
+</html>
